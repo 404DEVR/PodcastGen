@@ -9,6 +9,7 @@ import { api } from "@/convex/_generated/api";
 import { useToast } from "@/hooks/use-toast";
 import { v4 as uuidv4 } from "uuid";
 import { useUploadFiles } from "@xixixao/uploadstuff/react";
+import { Id } from "@/convex/_generated/dataModel";
 
 
 const useGeneratePodcast = ({
@@ -36,7 +37,6 @@ const useGeneratePodcast = ({
       throw new Error("Failed to fetch speech data");
     }
   };
-
   const [isGenerating, setIsGenerating] = useState(false);
   const { toast } = useToast();
 
@@ -62,10 +62,9 @@ const useGeneratePodcast = ({
       const audioBlob = await fetchAudio(voicePrompt);
       const fileName = `podcast-${uuidv4()}.mp3`;
       const file = new File([audioBlob], fileName, { type: "audio/mpeg" });
-
       const uploaded = await startUpload([file]);
       const storageId = (uploaded[0].response as any).storageId;
-
+      console.log(uploaded[0].response)
       setAudioStorageId(storageId);
 
       const audioUrl = await getAudioUrl({ storageId });

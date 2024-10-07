@@ -13,7 +13,7 @@ import { Button } from "./ui/button";
 import { useToast } from "@/hooks/use-toast";
 
 const PodcastDetailPlayer = ({
-  audioUrl,
+  audioUrl="",
   podcastTitle,
   author,
   imageUrl,

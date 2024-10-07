@@ -12,6 +12,8 @@ import { useUploadFiles } from '@xixixao/uploadstuff/react';
 import { api } from '@/convex/_generated/api';
 import axios from "axios";
 
+import { Id } from "@/convex/_generated/dataModel";
+
 const GenerateThumbnail = ({setImageStorageId,
 setImage,
 image,
@@ -23,7 +25,6 @@ setImagePrompt}:GenerateThumbnailProps) => {
   const generateUploadUrl = useMutation(api.files.generateUploadUrl);
   const { startUpload } = useUploadFiles(generateUploadUrl);
   const getImageUrl = useMutation(api.podcasts.getUrl);
-
   const handleImageGeneration = async () => {
     setIsImageLoading(true);
     setImage("");
@@ -37,9 +38,10 @@ setImagePrompt}:GenerateThumbnailProps) => {
       },
       data: { text: imagePrompt },
     };
+    const imagewords=imagePrompt.split(" ")
 
     try {
-      if(imagePrompt.length<5){
+      if (imagewords.length <= 5) {
         const response = await axios.request(options);
         const imageUrl = response.data.generated_image;
         console.log(imageUrl);
@@ -49,11 +51,11 @@ setImagePrompt}:GenerateThumbnailProps) => {
         console.log("Generated image blob:", imageBlob);
 
         await handleImage(imageBlob, "generated-thumbnail.png");
-      }else{
+      } else {
         toast({
-          title:"Please Enter a prompt of less than 5 letters",
-          variant:"destructive"
-        })
+          title: "Please Enter a prompt of less than 5 letters",
+          variant: "destructive",
+        });
       }
       
     } catch (error) {
@@ -80,7 +82,7 @@ setImagePrompt}:GenerateThumbnailProps) => {
      const uploaded = await startUpload([file]);
      console.log(uploaded)
 
-     const storageId = (uploaded[0].response as any).storageId;
+     const storageId = (uploaded[0].response as Id<"_storage">).storageId;
      setImageStorageId(storageId);
 
      const imageUrl = await getImageUrl({ storageId });

@@ -32,8 +32,8 @@ export interface PodcastProps {
   user: Id<"users">;
   podcastTitle: string;
   podcastDescription: string;
-  audioUrl: string ;
-  imageUrl: string | null;
+  audioUrl?: string ;
+  imageUrl?: string | null;
   imageStorageId: Id<"_storage"> | null;
   author: string;
   authorId: string;
@@ -41,7 +41,7 @@ export interface PodcastProps {
   voicePrompt: string;
   imagePrompt: string | null;
   // voiceType: string;
-  genre:string,
+  genre?:string,
   audioDuration: number;
   views: number;
 }

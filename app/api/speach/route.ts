@@ -19,7 +19,6 @@ export async function GET(req: Request) {
           "x-rapidapi-key": process.env.RAPIDAPI_KEY,
           "x-rapidapi-host": "text-to-speach-english.p.rapidapi.com",
         },
-        responseType: "arraybuffer", 
       }
     );
 
