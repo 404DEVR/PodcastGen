@@ -39,16 +39,23 @@ setImagePrompt}:GenerateThumbnailProps) => {
     };
 
     try {
-      const response = await axios.request(options);
-      const imageUrl = response.data.generated_image 
-      console.log(imageUrl);
+      if(imagePrompt.length<5){
+        const response = await axios.request(options);
+        const imageUrl = response.data.generated_image;
+        console.log(imageUrl);
 
-      const imageResponse = await fetch(imageUrl);
-      const imageBlob = await imageResponse.blob();
-      console.log("Generated image blob:", imageBlob);
+        const imageResponse = await fetch(imageUrl);
+        const imageBlob = await imageResponse.blob();
+        console.log("Generated image blob:", imageBlob);
 
-
-      await handleImage(imageBlob, "generated-thumbnail.png");
+        await handleImage(imageBlob, "generated-thumbnail.png");
+      }else{
+        toast({
+          title:"Please Enter a prompt of less than 5 letters",
+          variant:"destructive"
+        })
+      }
+      
     } catch (error) {
       console.error("Error generating image:", error);
       toast({
@@ -142,7 +149,7 @@ setImagePrompt}:GenerateThumbnailProps) => {
             <Button
               type="submit"
               className="text-16 bg-orange-1 py-4 font-bold text-white-1"
-              // onClick={handleImageGeneration}
+              onClick={handleImageGeneration}
             >
               {isImageLoading ? (
                 <>
