@@ -36,7 +36,7 @@ export default function RootLayout({
       <html lang="en">
         <AudioProvider>
           <body
-            className={`bg-black-3 md:overflow-hidden ${manrope.className}`}
+            className={`bg-black-3 ${manrope.className}`}
           >
             {children}
           </body>

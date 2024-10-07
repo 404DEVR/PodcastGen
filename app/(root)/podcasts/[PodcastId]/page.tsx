@@ -26,7 +26,6 @@ const PodcastDetails = ({
 
   const isOwner =user?.id === podcast?.authorId
 
-  // console.log(podcast?.audioUrl);
   if(!SimilarPodcast || !podcast ) return <LoaderSpinner />
   return (
     <section className="flex-flex-col w-full">
