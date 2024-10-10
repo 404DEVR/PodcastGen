@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { v4 as uuidv4 } from "uuid";
 import { useUploadFiles } from "@xixixao/uploadstuff/react";
 import axios from "axios";
+import { Id } from "@/convex/_generated/dataModel";
 
 const useGeneratePodcast = ({
   setAudio,
@@ -82,7 +83,7 @@ const useGeneratePodcast = ({
       const fileName = `podcast-${uuidv4()}.mp3`;
       const file = new File([audioBlob!], fileName, { type: "audio/mpeg" });
       const uploaded = await startUpload([file]);
-      const storageId = (uploaded[0].response as any).storageId;
+      const storageId = (uploaded[0].response as Id<"_storage">).storageId;
       setAudioStorageId(storageId);
       const audioUrl = await getAudioUrl({ storageId });
       setAudio(audioUrl!);
