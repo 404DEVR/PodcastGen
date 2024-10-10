@@ -40,7 +40,7 @@ const useGeneratePodcast = ({
          ],
        },
      };
-
+     console.log(options);
      try {
       if(!voiceType || !language){
         toast({
@@ -50,18 +50,22 @@ const useGeneratePodcast = ({
       }else{
         const response = await axios.request(options);
         const audioUrl = response.data[0].link;
+        console.log(audioUrl);
         const audioresponse = await fetch(audioUrl);
         const imageBlob = await audioresponse.blob();
         return imageBlob;
       }
      } catch (error) {
+       toast({
+         title:
+           "Your submission exceeds the maximum allowed word count of 300 words. Please revise your content to fit within the specified limit. Thank you for your understanding",
+       });
        console.error("Error fetching speech data:", error);
        throw new Error("Failed to fetch speech data");
      }
    };
   const [isGenerating, setIsGenerating] = useState(false);
   const { toast } = useToast();
-
   const generateUploadUrl = useMutation(api.files.generateUploadUrl);
   const { startUpload } = useUploadFiles(generateUploadUrl);
 
@@ -70,7 +74,6 @@ const useGeneratePodcast = ({
   const generatePodcast = async () => {
     setIsGenerating(true);
     setAudio("");
-
     if (!voicePrompt) {
       toast({
         title: "Please provide a voiceType to generate a podcast",
@@ -103,6 +106,7 @@ const useGeneratePodcast = ({
 
   return { isGenerating, generatePodcast };
 };
+
 
 const GeneratePodcast = (props: GeneratePodcastProps) => {
   const { isGenerating, generatePodcast } = useGeneratePodcast(props);
