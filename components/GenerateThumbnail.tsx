@@ -44,12 +44,8 @@ setImagePrompt}:GenerateThumbnailProps) => {
       if (imagewords.length <= 5) {
         const response = await axios.request(options);
         const imageUrl = response.data.generated_image;
-        console.log(imageUrl);
-
         const imageResponse = await fetch(imageUrl);
         const imageBlob = await imageResponse.blob();
-        console.log("Generated image blob:", imageBlob);
-
         await handleImage(imageBlob, "generated-thumbnail.png");
       } else {
         toast({
@@ -75,18 +71,11 @@ setImagePrompt}:GenerateThumbnailProps) => {
    setIsImageLoading(true);
    setImage("");
    try {
-    console.log(blob)
      const file = new File([blob], fileName, { type: "image/png" });
-     console.log(file)
-
      const uploaded = await startUpload([file]);
-     console.log(uploaded)
-
      const storageId = (uploaded[0].response as Id<"_storage">).storageId;
      setImageStorageId(storageId);
-
      const imageUrl = await getImageUrl({ storageId });
-
      setImage(imageUrl!);
      setIsImageLoading(false);
      toast({ title: "Thumbnail generated successfully" });
@@ -102,10 +91,8 @@ setImagePrompt}:GenerateThumbnailProps) => {
     e.preventDefault()
     try{
       const files=e.target.files;
-      console.log(files)
       if(!files) return;
       const file=files[0];
-      console.log(file)
       const blob=await file.arrayBuffer().then((ab)=>new Blob([ab]))
       handleImage(blob,file.name)
     }catch(err){

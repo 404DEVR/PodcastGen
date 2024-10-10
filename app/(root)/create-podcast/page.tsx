@@ -15,7 +15,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { SetStateAction, useEffect, useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import GeneratePodcast from "@/components/GeneratePodcast";
 import GenerateThumbnail from "@/components/GenerateThumbnail";
@@ -27,6 +27,8 @@ import { Id } from "@/convex/_generated/dataModel";
 import { useRouter } from "next/navigation";
 import { Label } from "@radix-ui/react-label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Voice, VoicesResponse} from "@/types";
+import axios from "axios";
 
 const podcastGenres = [
   "true crime",
@@ -51,7 +53,6 @@ const podcastGenres = [
   "interviews",
 ];
 
-// const voiceCategories = ["alloy", "shimmer", "nova", "echo", "fable", "onyx"]; 
 
 const formSchema = z.object({
   podcastTitle: z.string().min(2),
@@ -72,7 +73,7 @@ const CreatePodcast=()=> {
   async function onSubmit(data: z.infer<typeof formSchema>) {
     try{
       setIsSubmitting(true)
-      if(!audioUrl || !imageUrl || !genre){
+      if(!audioUrl || !imageUrl || !genre || !voiceType){
         toast({
           title: "Please generate Audio and Image",
           variant: "destructive",
@@ -88,7 +89,7 @@ const CreatePodcast=()=> {
         imageUrl,
         voicePrompt,
         imagePrompt,
-        // voiceType,
+        voiceType,
         genre,
         views: 0,
         audioDuration,
@@ -108,7 +109,6 @@ const CreatePodcast=()=> {
       })
       setIsSubmitting(false)
     }
-    console.log(data);
   }
   
   const [isSubmitting,setIsSubmitting]=useState(false)
@@ -123,9 +123,68 @@ const CreatePodcast=()=> {
   const [imageUrl,setImageUrl]=useState("")
   const [audioDuration,setAudioDuration]=useState(0)
   const [voicePrompt, setVoicePrompt] = useState("");
-  // const [voiceType, setVoiceType] = useState("");
+  const [voiceType, setVoiceType] = useState("");
+  const [voiceLanguage, setVoiceLanguage] = useState("");
+  const [playingAudio, setPlayingAudio] = useState("");
   const [genre, setgenre] = useState("");
+  const [filteredVoices, setFilteredVoices] = useState<Voice[]>([]);
+  const [voiceObj, setVoiceObj] = useState<Voice>();
+  const [voices, setVoices] = useState<VoicesResponse>({
+    data: [],
+    languages: [],
+  });
+  const handlevoiceChange = (value: string) => {
+    setVoiceType(value);
+    const selectedVoice = filteredVoices.find(
+      (voice) => voice.voice_name === value
+    );
+    setVoiceObj(selectedVoice!);
+    if (selectedVoice) {
+      setPlayingAudio(selectedVoice.sample_audio_url);
+      const audio = new Audio(selectedVoice.sample_audio_url);
+      audio.play();
+    }
+  };
+  useEffect(() => {
+    const storedVoices = localStorage.getItem("voices");
 
+    if (storedVoices) {
+      setVoices(JSON.parse(storedVoices));
+    } else {
+      const fetchVoices = async () => {
+        try {
+          const response = await axios.get<SetStateAction<VoicesResponse>>(
+            "https://realistic-text-to-speech.p.rapidapi.com/v3/get_all_v2_voices",
+            {
+              headers: {
+                "x-rapidapi-key":
+                  "f475346e6fmshb04316f6f3ebf43p142298jsnc48503acc2a1",
+                "x-rapidapi-host": "realistic-text-to-speech.p.rapidapi.com",
+              },
+            }
+          );
+          setVoices(response.data);
+          localStorage.setItem("voices", JSON.stringify(response.data)); // Store in localStorage
+        } catch (error) {
+          console.error("Error fetching voices", error);
+        }
+      };
+
+      fetchVoices();
+    }
+  }, []);
+  
+
+  useEffect(() => {
+    if (voiceLanguage) {
+      const voicesForLanguage = voices.data.filter(
+        (voice) => voice.language_name === voiceLanguage
+      );
+      setFilteredVoices(voicesForLanguage);
+    } else {
+      setFilteredVoices([]);
+    }
+  }, [voiceLanguage, voices.data]);
   return (
     <section className="mt-10 flex flex-col">
       <h1 className="text-20 font-bold text-white-1">Create Podcast</h1>
@@ -154,11 +213,39 @@ const CreatePodcast=()=> {
                 </FormItem>
               )}
             />
-            {/* <div className="flex flex-col gap-[2.5]">
+            <div className="flex flex-col gap-[2.5]">
               <Label className="text-16 font-bold text-white-1 pb-3">
-                Select AI Voices
+                Select Language
               </Label>
-              <Select onValueChange={(value) => setVoiceType(value)}>
+              <Select onValueChange={(value) => setVoiceLanguage(value)}>
+                <SelectTrigger
+                  className={`text-16 w-full border-none bg-black-1 text-gray-1 focus-visible:ring-offset-orange-1`}
+                >
+                  <SelectValue
+                    placeholder="Select Ai Language"
+                    className="placeholder:text-gray-1"
+                  />
+                </SelectTrigger>
+                <SelectContent className="text-16 border-none bg-black-1 font-bold text-white focus:ring-orange-1 text-white-1">
+                  {Array.from(
+                    new Set(voices.data.map((e) => e.language_name))
+                  ).map((e, i) => (
+                    <SelectItem
+                      key={i}
+                      value={e}
+                      className="capitalize focus:bg-orange-1"
+                    >
+                      {e}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex flex-col gap-[2.5]">
+              <Label className="text-16 font-bold text-white-1 pb-3">
+                Select Voice
+              </Label>
+              <Select onValueChange={(value) => handlevoiceChange(value)}>
                 <SelectTrigger
                   className={`text-16 w-full border-none bg-black-1 text-gray-1 focus-visible:ring-offset-orange-1`}
                 >
@@ -168,25 +255,22 @@ const CreatePodcast=()=> {
                   />
                 </SelectTrigger>
                 <SelectContent className="text-16 border-none bg-black-1 font-bold text-white focus:ring-orange-1 text-white-1">
-                  {voiceCategories.map((e) => (
+                  {filteredVoices.map((e, i) => (
                     <SelectItem
-                      key={e}
-                      value={e}
+                      key={i}
+                      value={e.voice_name}
                       className="capitalize focus:bg-orange-1"
                     >
-                      {e}
+                      {e.voice_name}
                     </SelectItem>
                   ))}
                 </SelectContent>
-                {voiceType && (
-                  <audio
-                    src={`/${voiceType}.mp3`}
-                    autoPlay
-                    className="hidden"
-                  ></audio>
+                {playingAudio && (
+                  <audio src={playingAudio} autoPlay className="hidden"></audio>
                 )}
               </Select>
-            </div> */}
+            </div>
+
             <div className="flex flex-col gap-[2.5]">
               <Label className="text-16 font-bold text-white-1 pb-3">
                 Select Genre
@@ -201,9 +285,9 @@ const CreatePodcast=()=> {
                   />
                 </SelectTrigger>
                 <SelectContent className="text-16 border-none bg-black-1 font-bold text-white focus:ring-orange-1 text-white-1">
-                  {podcastGenres.map((e) => (
+                  {podcastGenres.map((e, i) => (
                     <SelectItem
-                      key={e}
+                      key={i}
                       value={e}
                       className="capitalize focus:bg-orange-1"
                     >
@@ -235,9 +319,11 @@ const CreatePodcast=()=> {
           </div>
           <div className="flex-flex-col pt-10 ">
             <GeneratePodcast
+              voiceObj={voiceObj!}
+              language={voiceLanguage}
               setAudioStorageId={setAudioStorageId}
               setAudio={setAudioUrl}
-              // voiceType={voiceType!}
+              voiceType={voiceType!}
               audio={audioUrl}
               voicePrompt={voicePrompt}
               setVoicePrompt={setVoicePrompt}

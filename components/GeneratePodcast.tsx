@@ -1,4 +1,4 @@
-import { GeneratePodcastProps } from "@/types";
+import { GeneratePodcastProps} from "@/types";
 import React, { useState } from "react";
 import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
@@ -9,44 +9,63 @@ import { api } from "@/convex/_generated/api";
 import { useToast } from "@/hooks/use-toast";
 import { v4 as uuidv4 } from "uuid";
 import { useUploadFiles } from "@xixixao/uploadstuff/react";
-import { Id } from "@/convex/_generated/dataModel";
-
+import axios from "axios";
 
 const useGeneratePodcast = ({
   setAudio,
   voicePrompt,
   setAudioStorageId,
+  voiceType,
+  language,
+  voiceObj
 }: GeneratePodcastProps) => {
-  const fetchAudio = async (text: string) => {
-    try {
-      const response = await fetch(
-        `/api/speach?text=${encodeURIComponent(text)}`,
-        {
-          method: "GET",
-        }
-      );
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+   const fetchAudio = async (text: string) => {
+     const options = {
+       method: "POST",
+       url: "https://realistic-text-to-speech.p.rapidapi.com/v3/generate_voice_over_v2",
+       headers: {
+         "x-rapidapi-key": "f475346e6fmshb04316f6f3ebf43p142298jsnc48503acc2a1", 
+         "x-rapidapi-host": "realistic-text-to-speech.p.rapidapi.com",
+         "Content-Type": "application/json",
+       },
+       data: {
+         voice_obj: voiceObj,
+         json_data: [
+           {
+             block_index: 0,
+             text: text,
+           },
+         ],
+       },
+     };
+
+     try {
+      if(!voiceType || !language){
+        toast({
+          title:"Please select language and Ai voice first",
+          variant:"destructive"
+        })
+      }else{
+        const response = await axios.request(options);
+        const audioUrl = response.data[0].link;
+        const audioresponse = await fetch(audioUrl);
+        const imageBlob = await audioresponse.blob();
+        return imageBlob;
       }
-
-      const audioBlob = await response.blob();
-      return audioBlob; 
-    } catch (error) {
-      console.error("Error fetching speech data:", error);
-      throw new Error("Failed to fetch speech data");
-    }
-  };
+     } catch (error) {
+       console.error("Error fetching speech data:", error);
+       throw new Error("Failed to fetch speech data");
+     }
+   };
   const [isGenerating, setIsGenerating] = useState(false);
   const { toast } = useToast();
 
   const generateUploadUrl = useMutation(api.files.generateUploadUrl);
   const { startUpload } = useUploadFiles(generateUploadUrl);
 
-
   const getAudioUrl = useMutation(api.podcasts.getUrl);
 
-  
   const generatePodcast = async () => {
     setIsGenerating(true);
     setAudio("");
@@ -64,9 +83,7 @@ const useGeneratePodcast = ({
       const file = new File([audioBlob], fileName, { type: "audio/mpeg" });
       const uploaded = await startUpload([file]);
       const storageId = (uploaded[0].response as any).storageId;
-      console.log(uploaded[0].response)
       setAudioStorageId(storageId);
-
       const audioUrl = await getAudioUrl({ storageId });
       setAudio(audioUrl!);
       setIsGenerating(false);
@@ -88,7 +105,6 @@ const useGeneratePodcast = ({
 
 const GeneratePodcast = (props: GeneratePodcastProps) => {
   const { isGenerating, generatePodcast } = useGeneratePodcast(props);
-
   return (
     <div>
       <div className="flex flex-col gap-2.5">

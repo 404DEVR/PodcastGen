@@ -12,7 +12,7 @@ export const createPodcast = mutation({
     imageStorageId: v.union(v.id("_storage"), v.null()),
     voicePrompt: v.string(),
     imagePrompt: v.string(),
-    // voiceType: v.string(),
+    voiceType: v.string(),
     genre:v.string(),
     views: v.number(),
     audioDuration: v.number(),

@@ -40,11 +40,31 @@ export interface PodcastProps {
   authorImageUrl: string;
   voicePrompt: string;
   imagePrompt: string | null;
-  // voiceType: string;
+  voiceType: string;
   genre?:string,
   audioDuration: number;
   views: number;
 }
+
+export interface Voice {
+  gender: string; 
+  id: number; 
+  language_code: string; 
+  language_name: string; 
+  rank: number; 
+  sample_audio_url: string; 
+  sample_text: string; 
+  status: number;
+  type: string; 
+  voice_id: string; 
+  voice_name: string; 
+}
+
+export interface VoicesResponse {
+  data: Voice[];
+  languages: string[];
+}
+
 
 export interface ProfilePodcastProps {
   podcasts: PodcastProps[];
@@ -82,8 +102,11 @@ export type PodcastGenre =
   | "Self-Improvement"
   | "Travel";
 
+
 export interface GeneratePodcastProps {
-  // voiceType: string;
+  voiceObj:Voice;
+  voiceType: string;
+  language:string;
   setAudio: Dispatch<SetStateAction<string>>;
   audio: string;
   setAudioStorageId: Dispatch<SetStateAction<Id<"_storage"> | null>>;
@@ -130,6 +153,11 @@ export interface AudioProps {
   author: string;
   imageUrl: string;
   podcastId: string;
+}
+
+
+export interface VoicesResponse {
+  voices: Voice[];
 }
 
 export interface AudioContextType {
