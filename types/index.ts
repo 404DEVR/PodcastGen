@@ -40,7 +40,7 @@ export interface PodcastProps {
   authorImageUrl: string;
   voicePrompt: string;
   imagePrompt: string | null;
-  voiceType: string;
+  voiceType?: string|undefined;
   genre?:string,
   audioDuration: number;
   views: number;
@@ -68,7 +68,7 @@ export interface VoicesResponse {
 
 export interface ProfilePodcastProps {
   podcasts: PodcastProps[];
-  listeners: number;
+  listeners: number|undefined;
 }
 
 export type VoiceType =
@@ -135,14 +135,14 @@ export interface LatestPodcastCardProps {
 }
 
 export interface PodcastDetailPlayerProps {
-  audioUrl: string;
+  audioUrl?: string|undefined;
   podcastTitle: string;
   author: string;
   isOwner: boolean;
-  imageUrl: string;
+  imageUrl?: string|undefined;
   podcastId: Id<"podcasts">;
-  imageStorageId: Id<"_storage">;
-  audioStorageId: Id<"_storage">;
+  imageStorageId: Id<"_storage">|null;
+  audioStorageId: Id<"_storage">|null;
   authorImageUrl: string;
   authorId: string;
 }
@@ -155,10 +155,6 @@ export interface AudioProps {
   podcastId: string;
 }
 
-
-export interface VoicesResponse {
-  voices: Voice[];
-}
 
 export interface AudioContextType {
   audio: AudioProps | undefined;

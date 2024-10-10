@@ -32,7 +32,7 @@ const ProfilePage = ({
       </h1>
       <div className="mt-6 flex flex-col gap-6 max-md:items-center md:flex-row">
         <ProfileCard
-          podcastData={podcastsData!}
+          podcastData={podcastsData}
           imageUrl={user?.imageUrl}
           userFirstName={user?.name}
         />
