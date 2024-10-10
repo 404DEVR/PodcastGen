@@ -12,7 +12,7 @@ const SearchBar = () => {
     const pathname=usePathname()
     const debounceValue=useDebounce(search,500)
     useEffect(() => {
-      if (search) {
+      if (debounceValue) {
         router.push(`/discover?search=${debounceValue}`);
       } else if (!debounceValue && pathname === "/discover") {
         router.push("/discover");
