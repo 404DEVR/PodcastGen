@@ -96,7 +96,6 @@ setImagePrompt}:GenerateThumbnailProps) => {
       const blob=await file.arrayBuffer().then((ab)=>new Blob([ab]))
       handleImage(blob,file.name)
     }catch(err){
-      console.log(err);
       toast({title:"Error Uploading Image",variant:"destructive"})
     }
   }
